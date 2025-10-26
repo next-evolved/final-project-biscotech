@@ -1,10 +1,15 @@
 import { prisma } from "@/lib/db";
+import type { Prisma } from "@prisma/client";
 import { notFound } from "next/navigation";
 import { createComment, updateComment, deleteComment } from "@/app/(server-actions)/comments";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import type { Comment, User } from "@prisma/client";
-type CommentWithUser = Comment & { user: User | null };
+
+type CommentWithUser = Prisma.CommentGetPayload<{ include: { user: true } }>;
+type ArticleWithComments = Prisma.ArticleGetPayload<{
+  include: { comments: { include: { user: true } } };
+}>;
+
 
 
 type Params = { slug: string };
@@ -13,10 +18,10 @@ export default async function Page(props: unknown) {
   const { params } = props as { params: Params };
   const { slug } = params;
 
-  const article = await prisma.article.findUnique({
+  const article = (await prisma.article.findUnique({
     where: { slug },
     include: { comments: { orderBy: { createdAt: "desc" }, include: { user: true } } },
-  });
+  })) as ArticleWithComments | null;
   if (!article) return notFound();
 
   const session = await getServerSession(authOptions);
