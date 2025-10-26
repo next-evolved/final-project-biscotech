@@ -1,4 +1,3 @@
-import NextAuth, { type NextAuthOptions } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { prisma } from "./db";
 import { compare } from "bcrypt";

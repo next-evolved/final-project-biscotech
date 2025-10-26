@@ -4,7 +4,6 @@ import { prisma } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 
 import { z } from "zod";
 
@@ -31,7 +30,7 @@ export async function createComment(fd: FormData) {
     const c = await prisma.comment.create({ data: { ...data, userId: uid } });
     revalidatePath(`/articles/${fd.get("slug")}`);
     return c;
-  } catch (e) {
+  } catch (_e) {
     throw new Error("Failed to create comment");
   }
 }
@@ -47,7 +46,7 @@ export async function updateComment(fd: FormData) {
 
     await prisma.comment.update({ where: { id }, data: { body } });
     revalidatePath(`/articles/${fd.get("slug")}`);
-  } catch (e) {
+  } catch (_e) {
     throw new Error("Failed to update comment");
   }
 }
