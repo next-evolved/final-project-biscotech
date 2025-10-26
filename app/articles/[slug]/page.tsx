@@ -4,8 +4,11 @@ import { createComment, updateComment, deleteComment } from "@/app/(server-actio
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
-export default async function Page({ params }: any) {
-  const { slug } = params as { slug: string };
+type Params = { slug: string };
+
+export default async function Page(props: unknown) {
+  const { params } = props as { params: Params };
+  const { slug } = params;
 
   const article = await prisma.article.findUnique({
     where: { slug },
