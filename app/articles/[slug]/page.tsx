@@ -4,9 +4,11 @@ import { createComment, updateComment, deleteComment } from "@/app/(server-actio
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
-export default async function Page({ params }: { params: { slug: string } }) {
+export default async function Page({ params }: any) {
+  const { slug } = params as { slug: string };
+
   const article = await prisma.article.findUnique({
-    where: { slug: params.slug },
+    where: { slug },
     include: { comments: { orderBy: { createdAt: "desc" }, include: { user: true } } },
   });
   if (!article) return notFound();
@@ -35,9 +37,11 @@ export default async function Page({ params }: { params: { slug: string } }) {
         )}
 
         <ul className="grid gap-3">
-          {article.comments.map(c => (
+          {article.comments.map((c) => (
             <li key={c.id} className="border rounded p-3">
-              <p className="text-sm text-neutral-600 mb-1">{c.user?.email ?? "User"} · {new Date(c.createdAt).toLocaleString()}</p>
+              <p className="text-sm text-neutral-600 mb-1">
+                {c.user?.email ?? "User"} · {new Date(c.createdAt).toLocaleString()}
+              </p>
               <p className="whitespace-pre-wrap">{c.body}</p>
 
               {session?.user?.email && session.user.email === c.user?.email && (
