@@ -4,26 +4,25 @@ import Image from "next/image";
 import Link from "next/link";
 
 // Only the fields you actually use in the component.
-// (Optional fields keep TS happy even if some items lack data.)
 type ProjectItem = {
   id: string;
   title?: string | null;
   name?: string | null;
   description?: string | null;
-
-  // media/links actually used below
-  image?: string | null;       // your code references `cur.image`
-  imageUrl?: string | null;    // in case your data uses this key instead
-  href?: string | null;        // "Live Site" link
-  liveUrl?: string | null;     // if your data used this name instead
-  iframe?: string | null;      // in-page preview URL
-
-  // keep a small escape hatch without using `any`
+  image?: string | null;
+  imageUrl?: string | null;
+  href?: string | null;
+  liveUrl?: string | null;
+  iframe?: string | null;
   [key: string]: unknown;
 };
 
 export default function ClientCarousel({ projects }: { projects: ProjectItem[] }) {
-  // Guard against empty datasets (prevents runtime errors on `projects[0]`)
+  // ✅ Hooks must be first, unconditionally
+  const [i, setI] = useState(0);
+  const [preview, setPreview] = useState<string | null>(null);
+
+  // Handle empty list after hooks are declared
   if (!projects || projects.length === 0) {
     return (
       <div className="grid gap-4">
@@ -35,11 +34,10 @@ export default function ClientCarousel({ projects }: { projects: ProjectItem[] }
     );
   }
 
-  const [i, setI] = useState(0);
-  const [preview, setPreview] = useState<string | null>(null);
+  // Keep index in range in case projects length changes
+  const idx = ((i % projects.length) + projects.length) % projects.length;
+  const cur = projects[idx] as ProjectItem;
 
-  // Current project + safe fallbacks
-  const cur = projects[i] as ProjectItem;
   const title = (cur.title ?? cur.name ?? "Untitled").toString();
   const image = (cur.image ?? cur.imageUrl ?? "/placeholder.png").toString();
   const href = (cur.href ?? cur.liveUrl ?? "#").toString();
@@ -48,15 +46,27 @@ export default function ClientCarousel({ projects }: { projects: ProjectItem[] }
   const next = () => setI((v) => (v + 1) % projects.length);
   const prev = () => setI((v) => (v - 1 + projects.length) % projects.length);
 
+  const navDisabled = projects.length <= 1;
+
   return (
     <div className="grid gap-4">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-semibold">Projects</h2>
         <div className="flex gap-2">
-          <button className="px-3 py-1 border rounded cursor-pointer" onClick={prev} aria-label="Previous project">
+          <button
+            className="px-3 py-1 border rounded cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={prev}
+            aria-label="Previous project"
+            disabled={navDisabled}
+          >
             Prev
           </button>
-          <button className="px-3 py-1 border rounded cursor-pointer" onClick={next} aria-label="Next project">
+          <button
+            className="px-3 py-1 border rounded cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={next}
+            aria-label="Next project"
+            disabled={navDisabled}
+          >
             Next
           </button>
         </div>
@@ -79,7 +89,6 @@ export default function ClientCarousel({ projects }: { projects: ProjectItem[] }
           {cur.description && <p className="text-neutral-700">{cur.description}</p>}
 
           <div className="flex gap-3">
-            {/* Disable the link if we don't have a real URL */}
             {href !== "#" ? (
               <Link
                 className="px-3 py-1 rounded bg-neutral-900 text-white cursor-pointer"
@@ -108,7 +117,6 @@ export default function ClientCarousel({ projects }: { projects: ProjectItem[] }
         </div>
       </div>
 
-      {/* Simple modal */}
       {preview && (
         <div
           className="fixed inset-0 bg-black/50 z-50 grid place-items-center p-4"
@@ -124,7 +132,6 @@ export default function ClientCarousel({ projects }: { projects: ProjectItem[] }
                 Close
               </button>
             </div>
-            {/* Some sites won’t allow iframing; user will see a blank area + console warning */}
             <iframe
               src={preview}
               className="w-full h-full"
