@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { sendContactEmail } from "@/lib/mail";
 
 const ContactSchema = z.object({
   name: z.string().min(1),
@@ -19,12 +20,17 @@ export async function submitContact(fd: FormData) {
       message: String(fd.get("message") ?? ""),
     });
 
-    await prisma.contactInquiry.create({ data });
+    
+    await Promise.all([
+      prisma.contactInquiry.create({ data }),
+      sendContactEmail(data),
+    ]);
 
-    revalidatePath("/");    
+    revalidatePath("/");
+    redirect("/?contact=ok");
   } catch (e) {
     console.error("submitContact error:", e);
+    
     throw new Error("Failed to submit contact");
   }
-  redirect("/?contact=ok");
 }

@@ -1,6 +1,7 @@
 import HeroBanner from "@/components/HeroBanner";
 import ContactHeader from "@/components/ContactHeader";
-import { submitContact } from "@/app/(server-actions)/contact"; // ← your existing action
+import { submitContact } from "@/app/(server-actions)/contact";
+
 
 export default function Home() {
   return (
