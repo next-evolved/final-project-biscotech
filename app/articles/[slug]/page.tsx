@@ -3,6 +3,9 @@ import { notFound } from "next/navigation";
 import { createComment, updateComment, deleteComment } from "@/app/(server-actions)/comments";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import type { Comment, User } from "@prisma/client";
+type CommentWithUser = Comment & { user: User | null };
+
 
 type Params = { slug: string };
 
@@ -40,7 +43,7 @@ export default async function Page(props: unknown) {
         )}
 
         <ul className="grid gap-3">
-          {article.comments.map((c) => (
+          {article.comments.map((c: CommentWithUser) => (
             <li key={c.id} className="border rounded p-3">
               <p className="text-sm text-neutral-600 mb-1">
                 {c.user?.email ?? "User"} · {new Date(c.createdAt).toLocaleString()}
