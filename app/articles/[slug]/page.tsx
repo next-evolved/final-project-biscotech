@@ -1,16 +1,23 @@
 import { prisma } from "@/lib/db";
-import type { Prisma } from "@prisma/client";
 import { notFound } from "next/navigation";
 import { createComment, updateComment, deleteComment } from "@/app/(server-actions)/comments";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
-type CommentWithUser = Prisma.CommentGetPayload<{ include: { user: true } }>;
-type ArticleWithComments = Prisma.ArticleGetPayload<{
-  include: { comments: { include: { user: true } } };
-}>;
+type CommentItem = {
+  id: string;
+  body: string;
+  createdAt: Date | string;
+  user: { email: string | null } | null;
+};
 
-
+type ArticleWithComments = {
+  id: string;
+  slug: string;
+  title: string;
+  body: string;
+  comments: CommentItem[];
+};
 
 type Params = { slug: string };
 
@@ -22,6 +29,7 @@ export default async function Page(props: unknown) {
     where: { slug },
     include: { comments: { orderBy: { createdAt: "desc" }, include: { user: true } } },
   })) as ArticleWithComments | null;
+
   if (!article) return notFound();
 
   const session = await getServerSession(authOptions);
@@ -48,7 +56,7 @@ export default async function Page(props: unknown) {
         )}
 
         <ul className="grid gap-3">
-          {article.comments.map((c: CommentWithUser) => (
+          {article.comments.map((c: CommentItem) => (
             <li key={c.id} className="border rounded p-3">
               <p className="text-sm text-neutral-600 mb-1">
                 {c.user?.email ?? "User"} · {new Date(c.createdAt).toLocaleString()}
