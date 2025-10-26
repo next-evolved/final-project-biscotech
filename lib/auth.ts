@@ -1,6 +1,7 @@
 import Credentials from "next-auth/providers/credentials";
 import { prisma } from "./db";
 import { compare } from "bcrypt";
+import type { NextAuthOptions } from "next-auth";
 
 export const authOptions: NextAuthOptions = {
   session: { strategy: "jwt" },
@@ -15,13 +16,16 @@ export const authOptions: NextAuthOptions = {
         if (!creds?.email || !creds?.password) return null;
         const user = await prisma.user.findUnique({ where: { email: creds.email } });
         if (!user?.passwordHash) return null;
+
         const ok = await compare(creds.password, user.passwordHash);
         if (!ok) return null;
+
         return { id: user.id, name: user.name ?? "", email: user.email ?? "" };
       },
     }),
-    // Challenge: Google OAuth (keep commented until configured)
-    // GoogleProvider({ clientId: "...", clientSecret: "..." })
   ],
-  pages: { signIn: "/signin" },
+
+  pages: {
+    signIn: "/signin",
+  },
 };
