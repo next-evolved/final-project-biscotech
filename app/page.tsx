@@ -2,6 +2,9 @@ import HeroBanner from "@/components/HeroBanner";
 import ContactHeader from "@/components/ContactHeader";
 import { submitContact } from "@/app/(server-actions)/contact";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 
 export default function Home() {
   return (

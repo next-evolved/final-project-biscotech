@@ -4,6 +4,11 @@ import { createComment, updateComment, deleteComment } from "@/app/(server-actio
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
+<<<<<<< HEAD
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
+
 type CommentItem = {
   id: string;
   body: string;
@@ -27,6 +32,11 @@ export default async function Page(props: unknown) {
 
   const article = (await prisma.article.findUnique({
     where: { slug },
+=======
+export default async function Page({ params }: { params: { slug: string } }) {
+  const article = await prisma.article.findUnique({
+    where: { slug: params.slug },
+>>>>>>> parent of 7d4f01d (params fix)
     include: { comments: { orderBy: { createdAt: "desc" }, include: { user: true } } },
   })) as ArticleWithComments | null;
 
@@ -56,11 +66,13 @@ export default async function Page(props: unknown) {
         )}
 
         <ul className="grid gap-3">
+<<<<<<< HEAD
           {article.comments.map((c: CommentItem) => (
+=======
+          {article.comments.map(c => (
+>>>>>>> parent of 7d4f01d (params fix)
             <li key={c.id} className="border rounded p-3">
-              <p className="text-sm text-neutral-600 mb-1">
-                {c.user?.email ?? "User"} · {new Date(c.createdAt).toLocaleString()}
-              </p>
+              <p className="text-sm text-neutral-600 mb-1">{c.user?.email ?? "User"} · {new Date(c.createdAt).toLocaleString()}</p>
               <p className="whitespace-pre-wrap">{c.body}</p>
 
               {session?.user?.email && session.user.email === c.user?.email && (
