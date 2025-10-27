@@ -25,9 +25,10 @@ type ArticleWithComments = {
 
 type Params = { slug: string };
 
-export default async function Page(props: unknown) {
-  const { params } = props as { params: Params };
-  const { slug } = params;
+export default async function Page(
+  { params }: { params: Promise<{ slug: string }> }
+  ) {
+  const { slug } = await params;
 
   const article = (await prisma.article.findUnique({
     where: { slug },

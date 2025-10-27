@@ -5,10 +5,35 @@ import { submitContact } from "@/app/(server-actions)/contact";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ contact?: "ok" | "invalid" }>;
+}) {
+  const { contact } = await searchParams;
 
-export default function Home() {
   return (
     <div className="space-y-10">
+      {/* Status banner */}
+      {contact === "ok" && (
+        <div
+          role="status"
+          className="mx-auto max-w-2xl rounded border border-green-300 bg-green-50 p-3 text-green-800"
+        >
+          Thanks! Your message was sent.{" "}
+          <a href="/" className="underline">Dismiss</a>
+        </div>
+      )}
+      {contact === "invalid" && (
+        <div
+          role="alert"
+          className="mx-auto max-w-2xl rounded border border-amber-300 bg-amber-50 p-3 text-amber-800"
+        >
+          Please check the form and try again.{" "}
+          <a href="/" className="underline">Dismiss</a>
+        </div>
+      )}
+
       <HeroBanner />
 
       <section className="max-w-2xl mx-auto">
@@ -28,7 +53,7 @@ export default function Home() {
             className="border rounded p-3"
             required
           />
-          <textarea
+        <textarea
             name="message"
             placeholder="Your message"
             rows={6}
